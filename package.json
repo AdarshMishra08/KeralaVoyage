@@ -1,11 +1,11 @@
-@@ .. @@
  {
--  "name": "rest-express",
-+  "name": "yaathri-kerala-travel",
+   "name": "rest-express",
+   "name": "yaathri-kerala-travel",
    "version": "1.0.0",
-+  "description": "YAATHRI - Intelligent Kerala Travel Companion with GPS tracking, cultural discovery, and travel analytics",
+  "description": "YAATHRI - Intelligent Kerala Travel Companion with GPS tracking, cultural discovery, and travel analytics",
    "type": "module",
    "license": "MIT",
-+  "keywords": ["kerala", "travel", "gps-tracking", "tourism", "react", "nodejs"],
-+  "author": "YAATHRI Development Team",
-   "scripts": {
+   "keywords": ["kerala", "travel", "gps-tracking", "tourism", "react", "nodejs"],
+  "author": "YAATHRI Development Team",
+   "scripts": {}
+ }
