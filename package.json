@@ -7,5 +7,7 @@
    "license": "MIT",
    "keywords": ["kerala", "travel", "gps-tracking", "tourism", "react", "nodejs"],
   "author": "YAATHRI Development Team",
-   "scripts": {}
+   "scripts": {
+     "bulid":"react-scripts build"
+   }
  }
