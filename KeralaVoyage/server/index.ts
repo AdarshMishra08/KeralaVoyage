@@ -1,71 +1,117 @@
-import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
 
+const express = require("express");
+const { MongoClient } = require('mongodb');
+const path = require('path');
 const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+const port = 4000;
 
-app.use((req, res, next) => {
-  const start = Date.now();
-  const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
+const url = 'mongodb+srv://adarshmishra0008_db_user:<ramramapati08>@freecluster0.ptg6sid.mongodb.net/?retryWrites=true&w=majority&appName=freeCluster0';
 
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
+const express = require("express");
+const { MongoClient } = require('mongodb');
+const path = require('path');
+const app = express();
+const port = 4000;
 
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
+// --- IMPORTANT: You will edit this line in the next step ---
+const url = 'mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority';
+const dbName = 'kerala-voyage';
 
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
+const client = new MongoClient(url);
 
-      log(logLine);
-    }
-  });
+// --- Middleware ---
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
 
-  next();
+// --- Routes ---
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'index.html'));
+});
+app.get('/about', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'about.html'));
+});
+app.get('/contact', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'contact.html'));
+});
+app.get('/packages', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'packages.html'));
 });
 
-(async () => {
-  const server = await registerRoutes(app);
+app.post('/contact', async (req, res) => {
+    try {
+        const db = client.db(dbName);
+        const collection = db.collection('contacts');
+        await collection.insertOne(req.body);
+        console.log('Contact form data saved to database');
+        res.redirect('/');
+    } catch (err) {
+        console.error('Failed to save contact form data', err);
+        res.status(500).send('Message could not be sent.');
+    }
+});
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+// --- Connect to DB and Start Server ---
+async function startServer() {
+    try {
+        await client.connect();
+        console.log('✅ Connected successfully to MongoDB');
+        app.listen(port, () => {
+            console.log(`🚀 Server is running at http://localhost:${port}`);
+        });
+    } catch (err) {
+        console.error('Failed to connect to MongoDB', err);
+        process.exit(1);
+    }
+}
 
-    res.status(status).json({ message });
-    throw err;
-  });
+startServer();
+const dbName = 'kerala-voyage';
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
-  }
+const client = new MongoClient(url);
 
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || '5000', 10);
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
-  });
-})();
+// --- Middleware ---
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
+
+// --- Routes ---
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'index.html'));
+});
+app.get('/about', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'about.html'));
+});
+app.get('/contact', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'contact.html'));
+});
+app.get('/packages', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'packages.html'));
+});
+
+app.post('/contact', async (req, res) => {
+    try {
+        const db = client.db(dbName);
+        const collection = db.collection('contacts');
+        await collection.insertOne(req.body);
+        console.log('Contact form data saved to database');
+        res.redirect('/');
+    } catch (err) {
+        console.error('Failed to save contact form data', err);
+        res.status(500).send('Message could not be sent.');
+    }
+});
+
+// --- Connect to DB and Start Server ---
+async function startServer() {
+    try {
+        await client.connect();
+        console.log('✅ Connected successfully to MongoDB');
+        app.listen(port, () => {
+            console.log(`🚀 Server is running at http://localhost:${port}`);
+        });
+    } catch (err) {
+        console.error('Failed to connect to MongoDB', err);
+        process.exit(1);
+    }
+}
+
+startServer();
